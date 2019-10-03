@@ -10,6 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn import preprocessing
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error,r2_score
+from sklearn.tree import DecisionTreeRegressor
 
 
 data = pd.read_csv('AB_NYC_2019.csv')
@@ -48,16 +49,24 @@ X = data[['neighbourhood_group', 'longitude', 'latitude','room_type', 'reviews_p
 #separate it into train and test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-#fit and transform xtrain data using minmax scaler. We are only using xtrain because o.w the mean/max/min would differ.
+#fit and transform xtrain data using minmax scaler.
 scaler = MinMaxScaler()
 X_train_scaled = scaler.fit_transform(X_train)
 
-#create the model and fit xtrained (after scaling) and y training
+#create the model and fit (Train it) x_train (after scaling) and y_train (no scaling)
 model = LinearRegression()
 model.fit(X_train_scaled, y_train)
 
+model_2 = DecisionTreeRegressor()
+model_2.fit(X_train_scaled, y_train)
+
+#transform x_test
 X_test_scaled = scaler.transform(X_test)
+
+#predict using xtest transformed
 y_pred = model.predict(X_test_scaled)
+y_pred_2 = model_2.predict(X_test_scaled)
+
 
 print(X_train.shape)
 print(X_test.shape)
@@ -67,8 +76,16 @@ print(y_pred.shape)
 rmse = (np.sqrt(mean_squared_error(y_test, y_pred)))
 r2 = r2_score(y_test, y_pred)
 
-error_frame = pd.DataFrame({'Actual': np.array(y_test).flatten(), 'Predicted': y_pred.flatten()})
-print(error_frame.head(10))
+rmse_2= (np.sqrt(mean_squared_error(y_test, y_pred_2)))
+r2_2 = r2_score(y_test, y_pred_2)
 
-print(rmse)
-print(r2)
+error_frame = pd.DataFrame({'Actual': np.array(y_test).flatten(), 'Predicted': y_pred.flatten()})
+error_frame_2= pd.DataFrame({'Actual': np.array(y_test).flatten(), 'Predicted': y_pred_2.flatten()})
+print(error_frame.head(10))
+print(error_frame_2.head(10))
+
+print('rmse 1 is :' +str(rmse))
+print('r2 1 is :' + str(r2))
+
+print('rmse 2 is :' +str(rmse_2))
+print('r2 2 is :' + str(r2_2))
